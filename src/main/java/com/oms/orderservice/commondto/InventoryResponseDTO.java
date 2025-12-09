@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class InventoryResponseDTO {
     private Integer itemQuantity;
     private Integer itemId;
+    private String itemDescription;
     private boolean itemInStock;
     private double unitPrice;
 }

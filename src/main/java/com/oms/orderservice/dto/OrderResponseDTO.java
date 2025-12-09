@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 public class OrderResponseDTO {
     private String userId;
     private Integer itemId;
+    private String itemDescription;
     private double amount;
     private double orderTotal;
     private Integer quantity;

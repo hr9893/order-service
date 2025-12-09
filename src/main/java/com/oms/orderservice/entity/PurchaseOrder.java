@@ -21,6 +21,8 @@ public class PurchaseOrder {
     private String orderId;
     @Column(name = "ITEM_ID")
     private Integer itemId;
+    @Column(name = "ITEM_DESCRIPTION")
+    private String itemDescription;
     @Column(name = "USER_ID")
     private String userId;
     @Column(name = "ITEM_PRICE")

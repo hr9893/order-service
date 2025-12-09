@@ -43,27 +43,27 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
+        final String methodName = "createOrder";
+        log.info("Entry", methodName);
 
-        InventoryRequestDTO inventoryRequest = new InventoryRequestDTO(orderRequestDTO.getItemQuantity(),orderRequestDTO.getItemId());
+        InventoryRequestDTO inventoryRequest = new InventoryRequestDTO(orderRequestDTO.getItemQuantity(), orderRequestDTO.getItemId());
         InventoryResponseDTO inventoryResponse = restClient.checkInventory(inventoryRequest).getBody();
-        boolean isItemAvailable = inventoryResponse.isItemInStock();
 
-        PurchaseOrder savedOrder = convertDtoToPurchaseOrder(orderRequestDTO);
-        savedOrder.setPrice(inventoryResponse.getUnitPrice());
-        savedOrder.setOrderTotal(inventoryResponse.getUnitPrice() * orderRequestDTO.getItemQuantity());
-
+        PurchaseOrder savedOrder = convertDtoToPurchaseOrder(orderRequestDTO, inventoryResponse);
         savedOrder = orderRepository.save(savedOrder);
 
         OrderResponseDTO savedOrderResponse = buildOrderResponse(orderRequestDTO, savedOrder.getOrderTotal(),
-                savedOrder.getOrderId(), isItemAvailable);
+                savedOrder.getOrderId(), inventoryResponse);
+
         publishPaymentEvent(savedOrderResponse.getOrderId());
 
         log.info("Order Saved Successfully : {}", savedOrderResponse.toString());
+        log.info("Exit", methodName);
 
         return savedOrderResponse;
     }
 
-    private OrderResponseDTO buildOrderResponse(OrderRequestDTO orderRequestDTO, double orderTotal, String orderId, boolean isItemAvailable) {
+    private OrderResponseDTO buildOrderResponse(OrderRequestDTO orderRequestDTO, double orderTotal, String orderId, InventoryResponseDTO inventoryResponse) {
 
         OrderResponseDTO savedOrderResponse = convertDtoToEntity(orderRequestDTO);
 
@@ -71,7 +71,8 @@ public class OrderService {
         savedOrderResponse.setOrderstatus(OrderStatus.ORDER_CONFIRMED);
         savedOrderResponse.setPaymentStatus(PaymentStatus.AWAITING_PAYMENT);
         savedOrderResponse.setOrderId(orderId);
-        if (!isItemAvailable) {
+        savedOrderResponse.setItemDescription(inventoryResponse.getItemDescription());
+        if (!inventoryResponse.isItemInStock()) {
             savedOrderResponse.setOrderstatus(OrderStatus.ORDER_CANCELLED);
         }
 
@@ -92,16 +93,19 @@ public class OrderService {
         return Order;
     }
 
-    private PurchaseOrder convertDtoToPurchaseOrder(OrderRequestDTO dto) {
+    private PurchaseOrder convertDtoToPurchaseOrder(OrderRequestDTO orderRequestDTO, InventoryResponseDTO inventoryResponse) {
         PurchaseOrder Order = new PurchaseOrder();
 
         Order.setOrderId(generateOrderId());
-        Order.setUserId(dto.getUserId());
-        Order.setItemQuantity(dto.getItemQuantity());
-        Order.setItemId(dto.getItemId());
+        Order.setUserId(orderRequestDTO.getUserId());
+        Order.setItemQuantity(orderRequestDTO.getItemQuantity());
+        Order.setItemId(orderRequestDTO.getItemId());
         Order.setCreatedTimestamp(getLocalDateTime());
         Order.setLastUpdatedTimestamp(getLocalDateTime());
         Order.setPaymentStatus(PaymentStatus.AWAITING_PAYMENT);
+        Order.setPrice(inventoryResponse.getUnitPrice());
+        Order.setItemDescription(inventoryResponse.getItemDescription());
+        Order.setOrderTotal(inventoryResponse.getUnitPrice() * orderRequestDTO.getItemQuantity());
 
         return Order;
     }
@@ -113,8 +117,9 @@ public class OrderService {
         return "ORD-" + timestamp + "-" + random;
     }
 
+    @Transactional
     public void updateOrderWithPayment(PaymentEvent paymentResponse) {
-        logger.info("Updating Payment with Payment Event", paymentResponse.toString());
+        logger.info("Updating Payment with Payment Event : {}", paymentResponse.toString());
 
         PurchaseOrder getOrder = orderRepository.getOrderByOrderId(paymentResponse.getPaymentRequest().getOrderId());
         getOrder.setPaymentTransactionId(paymentResponse.getPaymentRequest().getTransactionId());
