@@ -5,6 +5,10 @@ import com.oms.orderservice.dto.OrderResponseDTO;
 import com.oms.orderservice.entity.PurchaseOrder;
 
 import com.oms.orderservice.services.OrderService;
+import com.oms.orderservice.services.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,15 +16,24 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/order")
+@Slf4j
 public class OrderController {
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
     @Autowired
     OrderService orderService;
-    @PostMapping("/save")
-    public OrderResponseDTO createOrder(@RequestBody OrderRequestDTO orderRequestDTO)
-    {
-        OrderResponseDTO saveOrderResponse = orderService.createOrder(orderRequestDTO);
+    @Autowired
+    UserService userService;
 
-        return saveOrderResponse;
+    @PostMapping("/save")
+    public OrderResponseDTO createOrder(@RequestBody OrderRequestDTO orderRequestDTO) {
+        logger.info("Incoming request for Order Creation : {}",orderRequestDTO.toString());
+
+        if (userService.validateUser(orderRequestDTO.getUserId())) {
+            OrderResponseDTO saveOrderResponse = orderService.createOrder(orderRequestDTO);
+
+            return saveOrderResponse;
+        } else
+            return null;
     }
     @GetMapping("/getAll")
     public List<PurchaseOrder> getAllOrders(){

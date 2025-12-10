@@ -71,4 +71,11 @@ public class UserService {
     public Users getUserById(String userId){
         return userRepository.getUserByUserId(userId);
     }
+    public boolean validateUser(String userId){
+        Users getUserResponse = userRepository.getUserByUserId(userId);
+        if (getUserResponse != null && getUserResponse.isActive()){
+            return true;
+        }else
+        return false;
+    }
 }
