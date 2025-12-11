@@ -1,5 +1,8 @@
 package com.oms.orderservice.config;
 
+import org.springframework.kafka.annotation.EnableKafka;
+
+@EnableKafka
 public class KafkaConfigurations {
     public static final String OB_PAYMENT_EVENTS_TOPIC = "payment-event";
     public static final String OB_PAYMENT_EVENT_GROUP = "payment-event-group";
