@@ -2,7 +2,9 @@ package com.oms.orderservice.services;
 
 import com.oms.orderservice.commondto.UserRequestDTO;
 import com.oms.orderservice.commondto.UserResponseDTO;
+import com.oms.orderservice.dto.UpdateUserRequestDTO;
 import com.oms.orderservice.entity.Users;
+import com.oms.orderservice.mapper.UserMapper;
 import com.oms.orderservice.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,8 @@ public class UserService {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(UserService.class);
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    UserMapper userMapper;
 
     public UserResponseDTO createUser(UserRequestDTO requestDTO) {
         final String methodName = "createUser";
@@ -38,7 +42,7 @@ public class UserService {
     @Transactional
     private Users buildSaveUserRequest(UserRequestDTO userRequest) {
         final String methodName = "buildSaveUserRequest";
-        logger.info("Entry", methodName);
+        logger.info("Entry {}", methodName);
         logger.info("Save User Request : {}", userRequest);
         Users saveUser = new Users();
 
@@ -56,8 +60,20 @@ public class UserService {
         saveUser.setCountry(userRequest.getCountry());
 
         userRepository.save(saveUser);
-        logger.info("Exit", methodName);
+        logger.info("Exit {}", methodName);
         return saveUser;
+    }
+
+    public Users updateUser(UpdateUserRequestDTO updateUserRequest) {
+        final String methodName = "updateUser";
+        logger.info("Entry {}", methodName);
+        Users updateUser = userRepository.findById(updateUserRequest.getUserId())
+                .orElseThrow(() -> new RuntimeException("User Not Found for UserId"));
+
+        userMapper.updateUserMapper(updateUserRequest, updateUser);
+
+        logger.info("Exit {}", methodName);
+        return userRepository.save(updateUser);
     }
 
     private String encryptPassword(String password) {

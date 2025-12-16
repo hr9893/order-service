@@ -2,6 +2,7 @@ package com.oms.orderservice.restService;
 
 import com.oms.orderservice.commondto.InventoryRequestDTO;
 import com.oms.orderservice.commondto.InventoryResponseDTO;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -17,19 +18,8 @@ public class InventoryRestClient {
 
     @Autowired
     private RestTemplate restTemplate;
-    String AVAILABLE_INVENTORY_CHECK_URL = "http://localhost:8083/inventory/check/availableInventory";
 
-    public InventoryResponseDTO checkInventory1(InventoryRequestDTO requestDTO) {
-        try {
-            return restTemplate.postForObject(
-                    AVAILABLE_INVENTORY_CHECK_URL,
-                    requestDTO,
-                    InventoryResponseDTO.class
-            );
-        } catch (RestClientException e) {
-            return null;
-        }
-    }
+    String AVAILABLE_INVENTORY_CHECK_URL = "http://inventory-service:8083/inventory/check/availableInventory";
 
     public ResponseEntity<InventoryResponseDTO> checkInventory(InventoryRequestDTO requestDTO) {
         log.info("Outgoing Request for Inventory : {}",requestDTO.toString());
@@ -43,9 +33,9 @@ public class InventoryRestClient {
                 httprequestEntity,
                 InventoryResponseDTO.class);
             return inventoryResponse;
-        }catch (RestClientException e){
-            log.info("Exception while calling Check Inventory Service ", e);
-            return null;
+        }catch (RestClientException e) {
+            log.error("Exception while calling Inventory Service", e);
+            throw new RuntimeException("Inventory service is unavailable", e);
         }
     }
 }

@@ -141,6 +141,7 @@ public class OrderService {
 
         PurchaseOrder getOrderResponse = orderRepository.getOrderByOrderId(orderId);
 
+        logger.info("Preparing Payment Publish Event", getOrderResponse.toString());
         PaymentRequestDTO paymentEvent = new PaymentRequestDTO();
 
         paymentEvent.setUserId(getOrderResponse.getUserId());
