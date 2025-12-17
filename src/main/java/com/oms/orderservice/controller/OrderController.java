@@ -2,6 +2,7 @@ package com.oms.orderservice.controller;
 
 import com.oms.orderservice.dto.OrderRequestDTO;
 import com.oms.orderservice.dto.OrderResponseDTO;
+import com.oms.orderservice.dto.UpdateOrderRequestDTO;
 import com.oms.orderservice.entity.PurchaseOrder;
 
 import com.oms.orderservice.services.OrderService;
@@ -42,5 +43,13 @@ public class OrderController {
     @GetMapping("/orderId/{orderId}")
     public PurchaseOrder getOrderByOrderId(@PathVariable String orderId){
         return orderService.getOrderById(orderId);
+    }
+
+    @PutMapping("/update")
+    public PurchaseOrder updateOrder(@RequestBody UpdateOrderRequestDTO updateOrderRequestDTO){
+        final String methodName = "updateOrder";
+        logger.info(methodName, "{} Entry", "Incoming Request for Order Update {}", updateOrderRequestDTO);
+
+        return orderService.updateOrders(updateOrderRequestDTO);
     }
 }

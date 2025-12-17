@@ -36,7 +36,7 @@ public class UserController {
     @PutMapping("/update")
     public Users updateUser(@RequestBody UpdateUserRequestDTO updateOrderRequest){
         final String methodName = "updateUser";
-        logger.info(methodName, "{} Entry","Update User Incoming Payload {}", updateOrderRequest);
+        logger.info(methodName, "{} Entry ","Update User Incoming Payload {}", updateOrderRequest);
         Users user = userService.updateUser(updateOrderRequest);
 
         logger.info("Exit {}", methodName);

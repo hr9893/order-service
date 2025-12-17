@@ -2,14 +2,12 @@ package com.oms.orderservice.services;
 
 import com.oms.orderservice.commondto.InventoryRequestDTO;
 import com.oms.orderservice.commondto.InventoryResponseDTO;
-import com.oms.orderservice.dto.OrderRequestDTO;
-import com.oms.orderservice.dto.OrderResponseDTO;
-import com.oms.orderservice.dto.PaymentRequestDTO;
-import com.oms.orderservice.dto.PaymentResponseDTO;
+import com.oms.orderservice.dto.*;
 import com.oms.orderservice.entity.PurchaseOrder;
 import com.oms.orderservice.events.OrderStatus;
 import com.oms.orderservice.events.PaymentEvent;
 import com.oms.orderservice.events.PaymentStatus;
+import com.oms.orderservice.mapper.OrderMapper;
 import com.oms.orderservice.messageListner.MessageListner;
 import com.oms.orderservice.messageProducer.MessageProducer;
 import com.oms.orderservice.repository.OrderRepository;
@@ -40,6 +38,8 @@ public class OrderService {
     private MessageProducer eventsProducer;
     @Autowired
     private InventoryRestClient restClient;
+    @Autowired
+    private OrderMapper orderMapper;
 
     @Transactional
     public OrderResponseDTO createOrder(OrderRequestDTO orderRequestDTO) {
@@ -154,6 +154,23 @@ public class OrderService {
         eventsProducer.publishPaymentEvent(paymentEvent);
     }
 
+    @Transactional
+    public PurchaseOrder updateOrders(UpdateOrderRequestDTO orderRequestDTO) {
+        final String methodName = "updateOrders";
+        logger.info(methodName, "{} Entry");
+        try {
+            PurchaseOrder getOrder = orderRepository.getOrderByOrderId(orderRequestDTO.getOrderId());
+            if (getOrder != null) {
+                orderMapper.updateOrderFromDto(orderRequestDTO, getOrder);
+
+                logger.info(methodName, "{} Exit");
+                return orderRepository.save(getOrder);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Exception while updating the Order", e);
+        }
+        return null;
+    }
     public PurchaseOrder getOrderById(String orderId) {
         PurchaseOrder getOrderResponse = orderRepository.getOrderByOrderId(orderId);
         return getOrderResponse;

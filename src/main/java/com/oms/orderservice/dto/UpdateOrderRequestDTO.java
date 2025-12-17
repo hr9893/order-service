@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UpdateOrderRequestDTO {
+    private String orderId;
     private String userId;
     private String firstName;
     private String lastName;
