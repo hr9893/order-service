@@ -22,7 +22,9 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Expose your application port
-EXPOSE 8081
+EXPOSE 8081 5005
 
 # Run the jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java",
+ "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
+ "-jar","app.jar"]

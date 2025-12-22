@@ -8,13 +8,12 @@ import com.oms.orderservice.events.OrderStatus;
 import com.oms.orderservice.events.PaymentEvent;
 import com.oms.orderservice.events.PaymentStatus;
 import com.oms.orderservice.mapper.OrderMapper;
-import com.oms.orderservice.messageListner.MessageListner;
 import com.oms.orderservice.messageProducer.MessageProducer;
 import com.oms.orderservice.repository.OrderRepository;
 import com.oms.orderservice.restService.InventoryRestClient;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,14 +21,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class OrderService {
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     @Autowired
@@ -163,7 +160,7 @@ public class OrderService {
             if (getOrder != null) {
                 orderMapper.updateOrderFromDto(orderRequestDTO, getOrder);
 
-                logger.info(methodName, "{} Exit");
+                logger.info(methodName, "{} Exit", "Outgoing Payload {}", getOrder);
                 return orderRepository.save(getOrder);
             }
         } catch (Exception e) {
@@ -189,4 +186,5 @@ public class OrderService {
         long id = uuid.getMostSignificantBits() & Long.MAX_VALUE;
         return id;
     }
+
 }
