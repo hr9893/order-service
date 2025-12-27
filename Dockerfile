@@ -25,6 +25,4 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8081 5005
 
 # Run the jar
-ENTRYPOINT ["java",
- "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005",
- "-jar","app.jar"]
+ENTRYPOINT ["java","-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005","-jar","app.jar"]
